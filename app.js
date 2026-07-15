@@ -39,7 +39,7 @@ app.post("/create-post", async (req,res)=>{
 
 
 
-// VIEW ALL POST API
+// VIEW ALL POST API - no input, token is the only input
 app.post("/view-all-post", (req,res)=>{
     let token = req.headers.token //token inside headers - token is the only input here - only authenticated users can access all posts
     jwt.verify(token, "blogApp", (error,decoded)=>{
@@ -52,6 +52,32 @@ app.post("/view-all-post", (req,res)=>{
             ).catch(
                 (eeror)=>{
                     res.json({"status":"error"})
+                }
+            )
+            
+        } else {
+            res.json({"status":"Invalid Authentication"})
+        }
+    })
+    
+})
+
+
+
+//VIEW MY POST API - input : userId + token
+app.post("/view-my-post", (req,res)=>{
+    let input = req.body
+    let token = req.headers.token 
+    jwt.verify(token, "blogApp", (error,decoded)=>{
+        if (decoded && decoded.email) {
+
+            postModel.find(input).then(
+                (items)=>{
+                    res.json(items)
+                }
+            ).catch(
+                (error)=>{
+                    res.json({"status":error})
                 }
             )
             
