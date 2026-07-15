@@ -4,6 +4,7 @@ const Bcrypt = require("bcrypt")
 const Cors = require("cors")
 const jwt = require("jsonwebtoken")
 const userModel = require("./models/users")
+const postModel = require("./models/posts")
 
 let app = Express()
 
@@ -11,6 +12,32 @@ app.use(Express.json())
 app.use(Cors())
 
 Mongoose.connect("mongodb://aswathy:ashexhere22@ac-d01d9ty-shard-00-00.36nhatr.mongodb.net:27017,ac-d01d9ty-shard-00-01.36nhatr.mongodb.net:27017,ac-d01d9ty-shard-00-02.36nhatr.mongodb.net:27017/blogdb?ssl=true&replicaSet=atlas-sg5pws-shard-0&authSource=admin&appName=Cluster0")
+
+
+// CREATE A POST - AFTER LOGIN
+app.post("/create-post", async (req,res)=>{
+    let input =req.body
+    //token validation by passing it through body or header
+    //professional format - input : through body, token : through header
+
+    let token = req.headers.token
+    jwt.verify(token, "blogApp", async (error, decoded)=>{
+        if (decoded && decoded.email) {
+            
+            let result = new postModel(input)
+            await result.save()
+            res.json({"status":"success"})
+
+        } else {
+            res.json({"status":"Invalid Authentication"}) //if token is not correct 
+        }
+
+    }) // verify token
+})
+//api + input != data insertion
+//api + correct input + token = data insertion & storing , token is only give to the user after login - for authentication & security of data
+
+
 
 
 // USER SIGN IN
