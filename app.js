@@ -14,11 +14,11 @@ app.use(Cors())
 Mongoose.connect("mongodb://aswathy:ashexhere22@ac-d01d9ty-shard-00-00.36nhatr.mongodb.net:27017,ac-d01d9ty-shard-00-01.36nhatr.mongodb.net:27017,ac-d01d9ty-shard-00-02.36nhatr.mongodb.net:27017/blogdb?ssl=true&replicaSet=atlas-sg5pws-shard-0&authSource=admin&appName=Cluster0")
 
 
-// CREATE A POST - AFTER LOGIN
+// CREATE A POST API - AFTER LOGIN
 app.post("/create-post", async (req,res)=>{
     let input =req.body
     //token validation by passing it through body or header
-    //professional format - input : through body, token : through header
+    //standard format - input : through body, token : through header
 
     let token = req.headers.token
     jwt.verify(token, "blogApp", async (error, decoded)=>{
@@ -39,8 +39,33 @@ app.post("/create-post", async (req,res)=>{
 
 
 
+// VIEW ALL POST API
+app.post("/view-all-post", (req,res)=>{
+    let token = req.headers.token //token inside headers - token is the only input here - only authenticated users can access all posts
+    jwt.verify(token, "blogApp", (error,decoded)=>{
+        if (decoded && decoded.email) {
 
-// USER SIGN IN
+            postModel.find().then(
+                (items)=>{
+                    res.json(items)
+                }
+            ).catch(
+                (eeror)=>{
+                    res.json({"status":"error"})
+                }
+            )
+            
+        } else {
+            res.json({"status":"Invalid Authentication"})
+        }
+    })
+    
+})
+
+
+
+
+// USER SIGN IN API
 app.post("/sign-in" ,async (req,res)=>{ //read 2 inputs - email and password , if signin get true then generate tokens as well
 
     let input =req.body
@@ -77,7 +102,7 @@ app.post("/sign-in" ,async (req,res)=>{ //read 2 inputs - email and password , i
 
 
 
-// USER SIGN UP
+// USER SIGN UP API
 app.post("/sign-up", async (req,res)=>{
     // input
     let input = req.body
