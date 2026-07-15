@@ -12,6 +12,45 @@ app.use(Cors())
 
 Mongoose.connect("mongodb://aswathy:ashexhere22@ac-d01d9ty-shard-00-00.36nhatr.mongodb.net:27017,ac-d01d9ty-shard-00-01.36nhatr.mongodb.net:27017,ac-d01d9ty-shard-00-02.36nhatr.mongodb.net:27017/blogdb?ssl=true&replicaSet=atlas-sg5pws-shard-0&authSource=admin&appName=Cluster0")
 
+
+// USER SIGN IN
+app.post("/sign-in" ,async (req,res)=>{ //read 2 inputs - email and password , if signin get true then generate tokens as well
+
+    let input =req.body
+    //read email and pas
+    let result = userModel.find({email:req.body.email}).then(
+        (items)=>{
+            if (items.length>0) {
+
+                const passwordValidator = Bcrypt.compareSync(req.body.password, items[0].password)  //password comparison : req.body.password - inputed password  & items[0].password - password stored in the db, true - correct pass & false - invalid pass
+
+                //token generation - to secure 1 API from other API's
+                if (passwordValidator) {
+                    jwt.sign({email:req.body.email}, "blogApp", {expiresIn: "1d"}, 
+                    (error, token)=>{
+                        if (error) {
+                            res.json({"status":"error", "errorMessage":error})
+                        } else {
+                            res.json({"status":"success", "token":token, "userId":items[0]._id})
+                        }
+                    })
+                    
+                } else {
+                    res.json({"status":"Incorrect Password"})
+                }
+                
+            } else {
+                res.json({"status":"Invalid Email Id"}) 
+            }
+        }
+    ).catch()
+
+})
+
+
+
+
+// USER SIGN UP
 app.post("/sign-up", async (req,res)=>{
     // input
     let input = req.body
